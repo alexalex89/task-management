@@ -88,7 +88,7 @@ describe('useTasks Hook', () => {
         result.current.addTask(newTask)
       })
       
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('tasks', expect.any(String))
+      expect(localStorageMock.setItem).toHaveBeenCalledWith('gtd-tasks', expect.any(String))
     })
   })
 

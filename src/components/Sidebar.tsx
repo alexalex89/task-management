@@ -26,13 +26,17 @@ const categoryIcons: Record<TaskCategory, string> = {
 export const Sidebar = ({ activeCategory, onCategoryChange, taskCounts, onTaskDrop }: SidebarProps) => {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
   };
 
   const handleDrop = (e: React.DragEvent, category: TaskCategory) => {
     e.preventDefault();
     
     try {
+      if (!e.dataTransfer) return;
+      
       const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
       const { taskId } = dragData;
       
@@ -69,6 +73,8 @@ export const Sidebar = ({ activeCategory, onCategoryChange, taskCounts, onTaskDr
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, category as TaskCategory)}
+            aria-pressed={activeCategory === category}
+            aria-label={`${label} (${taskCounts[category as TaskCategory]} Aufgaben)`}
           >
             <span className="nav-icon">{categoryIcons[category as TaskCategory]}</span>
             <span className="nav-label">{label}</span>

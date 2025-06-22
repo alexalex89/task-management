@@ -30,11 +30,11 @@ describe('Sidebar', () => {
         />
       )
       
-      expect(screen.getByRole('button', { name: /📥 Inbox/ })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /⏭️ Next/ })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /⏳ Waiting/ })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /📅 Scheduled/ })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /💭 Someday/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Inbox \(5 Aufgaben\)/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Waiting \(2 Aufgaben\)/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Scheduled \(1 Aufgaben\)/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Someday \(0 Aufgaben\)/ })).toBeInTheDocument()
     })
 
     it('should display task counts', () => {
@@ -62,7 +62,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       expect(nextButton).toHaveClass('active')
     })
   })
@@ -78,7 +78,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       await user.click(nextButton)
       
       expect(mockOnCategoryChange).toHaveBeenCalledWith('next')
@@ -95,16 +95,16 @@ describe('Sidebar', () => {
       )
       
       const categories: TaskCategory[] = ['inbox', 'next', 'waiting', 'scheduled', 'someday']
-      const buttonSelectors = [
-        /📥 Inbox/,
-        /⏭️ Next/,
-        /⏳ Waiting/,
-        /📅 Scheduled/,
-        /💭 Someday/
+      const buttonLabels = [
+        /Inbox \(5 Aufgaben\)/,
+        /Next \(3 Aufgaben\)/,
+        /Waiting \(2 Aufgaben\)/,
+        /Scheduled \(1 Aufgaben\)/,
+        /Someday \(0 Aufgaben\)/
       ]
       
       for (let i = 0; i < categories.length; i++) {
-        const button = screen.getByRole('button', { name: buttonSelectors[i] })
+        const button = screen.getByRole('button', { name: buttonLabels[i] })
         await user.click(button)
         expect(mockOnCategoryChange).toHaveBeenCalledWith(categories[i])
       }
@@ -122,9 +122,9 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       
-      fireEvent.dragOver(nextButton)
+      fireEvent.dragEnter(nextButton)
       
       expect(nextButton).toHaveClass('drag-over')
     })
@@ -139,7 +139,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       
       fireEvent.dragEnter(nextButton)
       expect(nextButton).toHaveClass('drag-over')
@@ -158,7 +158,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       
       const mockDragEvent = {
         preventDefault: vi.fn(),
@@ -184,7 +184,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       
       const mockDragEvent = {
         preventDefault: vi.fn(),
@@ -210,7 +210,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       
       const mockDragEvent = {
         preventDefault: vi.fn(),
@@ -297,7 +297,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       
       nextButton.focus()
       expect(nextButton).toHaveFocus()
@@ -315,10 +315,10 @@ describe('Sidebar', () => {
         />
       )
       
-      const inboxButton = screen.getByRole('button', { name: /📥 Inbox/ })
+      const inboxButton = screen.getByRole('button', { name: /Inbox \(5 Aufgaben\)/ })
       expect(inboxButton).toHaveAttribute('aria-pressed', 'true')
       
-      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      const nextButton = screen.getByRole('button', { name: /Next \(3 Aufgaben\)/ })
       expect(nextButton).toHaveAttribute('aria-pressed', 'false')
     })
   })

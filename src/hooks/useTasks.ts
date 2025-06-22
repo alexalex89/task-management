@@ -99,9 +99,23 @@ export const useTasks = () => {
   };
 
   const getTasksByCategory = (category: TaskCategory) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    
     return tasks
       .filter(task => task.category === category)
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => {
+        // First sort by priority (high to low)
+        const priorityDiff = (priorityOrder[b.priority as keyof typeof priorityOrder] || 0) - 
+                           (priorityOrder[a.priority as keyof typeof priorityOrder] || 0);
+        if (priorityDiff !== 0) return priorityDiff;
+        
+        // Then sort by creation date (newest first)
+        const dateDiff = b.createdAt.getTime() - a.createdAt.getTime();
+        if (dateDiff !== 0) return dateDiff;
+        
+        // Finally sort by order
+        return a.order - b.order;
+      });
   };
 
   const getCompletedTasks = () => {
