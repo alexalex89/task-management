@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: gtd-postgres
+    environment:
+      POSTGRES_DB: gtd_tasks
+      POSTGRES_USER: gtd_user
+      POSTGRES_PASSWORD: gtd_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - gtd-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gtd_user -d gtd_tasks"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: gtd-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gtd.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - gtd-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # GTD Task Management App
+  gtd-app:
+    build: .
+    container_name: gtd-app
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000/api
+      - REACT_APP_DB_HOST=postgres
+      - REACT_APP_DB_PORT=5432
+      - REACT_APP_DB_NAME=gtd_tasks
+      - REACT_APP_DB_USER=gtd_user
+      - REACT_APP_DB_PASSWORD=gtd_password
+    networks:
+      - gtd-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Backend API (Node.js/Express)
+  backend:
+    build: ./backend
+    container_name: gtd-backend
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=gtd_tasks
+      - DB_USER=gtd_user
+      - DB_PASSWORD=gtd_password
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+    ports:
+      - "3001:3000"
+    networks:
+      - gtd-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  gtd-network:
+    driver: bridge 
