@@ -21,7 +21,7 @@ describe('Sidebar', () => {
   })
 
   describe('Rendering', () => {
-    it('should render sidebar with title', () => {
+    it('should render all category buttons', () => {
       render(
         <Sidebar
           activeCategory="inbox"
@@ -30,26 +30,14 @@ describe('Sidebar', () => {
         />
       )
       
-      expect(screen.getByText('GTD Tasks')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /📥 Inbox/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /⏭️ Next/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /⏳ Waiting/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /📅 Scheduled/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /💭 Someday/ })).toBeInTheDocument()
     })
 
-    it('should render all category navigation items', () => {
-      render(
-        <Sidebar
-          activeCategory="inbox"
-          onCategoryChange={mockOnCategoryChange}
-          taskCounts={defaultTaskCounts}
-        />
-      )
-      
-      expect(screen.getByText('📥 Inbox')).toBeInTheDocument()
-      expect(screen.getByText('⏭️ Next')).toBeInTheDocument()
-      expect(screen.getByText('⏳ Waiting')).toBeInTheDocument()
-      expect(screen.getByText('📅 Scheduled')).toBeInTheDocument()
-      expect(screen.getByText('💭 Someday')).toBeInTheDocument()
-    })
-
-    it('should display task counts for each category', () => {
+    it('should display task counts', () => {
       render(
         <Sidebar
           activeCategory="inbox"
@@ -74,7 +62,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       expect(nextButton).toHaveClass('active')
     })
   })
@@ -90,7 +78,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       await user.click(nextButton)
       
       expect(mockOnCategoryChange).toHaveBeenCalledWith('next')
@@ -107,11 +95,18 @@ describe('Sidebar', () => {
       )
       
       const categories: TaskCategory[] = ['inbox', 'next', 'waiting', 'scheduled', 'someday']
+      const buttonSelectors = [
+        /📥 Inbox/,
+        /⏭️ Next/,
+        /⏳ Waiting/,
+        /📅 Scheduled/,
+        /💭 Someday/
+      ]
       
-      for (const category of categories) {
-        const button = screen.getByText(new RegExp(category, 'i')).closest('button')!
+      for (let i = 0; i < categories.length; i++) {
+        const button = screen.getByRole('button', { name: buttonSelectors[i] })
         await user.click(button)
-        expect(mockOnCategoryChange).toHaveBeenCalledWith(category)
+        expect(mockOnCategoryChange).toHaveBeenCalledWith(categories[i])
       }
     })
   })
@@ -127,7 +122,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       
       fireEvent.dragOver(nextButton)
       
@@ -144,7 +139,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       
       fireEvent.dragEnter(nextButton)
       expect(nextButton).toHaveClass('drag-over')
@@ -163,7 +158,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       
       const mockDragEvent = {
         preventDefault: vi.fn(),
@@ -189,7 +184,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       
       const mockDragEvent = {
         preventDefault: vi.fn(),
@@ -215,7 +210,7 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       
       const mockDragEvent = {
         preventDefault: vi.fn(),
@@ -279,7 +274,7 @@ describe('Sidebar', () => {
   })
 
   describe('Accessibility', () => {
-    it('should have proper button roles', () => {
+    it('should have proper semantic structure', () => {
       render(
         <Sidebar
           activeCategory="inbox"
@@ -288,8 +283,8 @@ describe('Sidebar', () => {
         />
       )
       
-      const buttons = screen.getAllByRole('button')
-      expect(buttons).toHaveLength(5) // 5 category buttons
+      expect(screen.getByRole('navigation')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Task Management' })).toBeInTheDocument()
     })
 
     it('should be keyboard navigable', async () => {
@@ -302,12 +297,29 @@ describe('Sidebar', () => {
         />
       )
       
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       
       nextButton.focus()
-      await user.keyboard('{Enter}')
+      expect(nextButton).toHaveFocus()
       
+      await user.keyboard('{Enter}')
       expect(mockOnCategoryChange).toHaveBeenCalledWith('next')
+    })
+
+    it('should have proper ARIA attributes', () => {
+      render(
+        <Sidebar
+          activeCategory="inbox"
+          onCategoryChange={mockOnCategoryChange}
+          taskCounts={defaultTaskCounts}
+        />
+      )
+      
+      const inboxButton = screen.getByRole('button', { name: /📥 Inbox/ })
+      expect(inboxButton).toHaveAttribute('aria-pressed', 'true')
+      
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
+      expect(nextButton).toHaveAttribute('aria-pressed', 'false')
     })
   })
 }) 

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 
@@ -24,7 +24,7 @@ describe('App', () => {
     it('should render the main app structure', () => {
       render(<App />)
       
-      expect(screen.getByText('GTD Tasks')).toBeInTheDocument()
+      expect(screen.getByText('Task Management')).toBeInTheDocument()
       expect(screen.getByText('Inbox')).toBeInTheDocument()
       expect(screen.getByText('0 Aufgaben')).toBeInTheDocument()
     })
@@ -60,25 +60,25 @@ describe('App', () => {
       render(<App />)
       
       // Initially on Inbox
-      expect(screen.getByText('Inbox')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Inbox' })).toBeInTheDocument()
       
       // Click on Next
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       await user.click(nextButton)
       
-      expect(screen.getByText('Next')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Next' })).toBeInTheDocument()
       
       // Click on Waiting
-      const waitingButton = screen.getByText('⏳ Waiting').closest('button')!
+      const waitingButton = screen.getByRole('button', { name: /⏳ Waiting/ })
       await user.click(waitingButton)
       
-      expect(screen.getByText('Waiting')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Waiting' })).toBeInTheDocument()
     })
 
     it('should highlight active category', () => {
       render(<App />)
       
-      const inboxButton = screen.getByText('📥 Inbox').closest('button')
+      const inboxButton = screen.getByRole('button', { name: /📥 Inbox/ })
       expect(inboxButton).toHaveClass('active')
     })
   })
@@ -106,7 +106,7 @@ describe('App', () => {
       render(<App />)
       
       // Switch to Next category
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       await user.click(nextButton)
       
       // Add a task
@@ -137,7 +137,7 @@ describe('App', () => {
       await user.click(checkbox)
       
       // Task should be marked as completed
-      const taskElement = screen.getByText('Test Task').closest('div')
+      const taskElement = screen.getByText('Test Task').closest('.task-content')
       expect(taskElement).toHaveClass('completed')
     })
 
@@ -155,7 +155,7 @@ describe('App', () => {
       expect(screen.getByText('Task to Delete')).toBeInTheDocument()
       
       // Delete the task
-      const deleteButton = screen.getByRole('button', { name: /delete/i })
+      const deleteButton = screen.getByRole('button', { name: /🗑️/ })
       await user.click(deleteButton)
       
       expect(screen.queryByText('Task to Delete')).not.toBeInTheDocument()
@@ -174,7 +174,7 @@ describe('App', () => {
       await user.click(addButton)
       
       // Edit the task
-      const editButton = screen.getByRole('button', { name: /edit/i })
+      const editButton = screen.getByRole('button', { name: /✏️/ })
       await user.click(editButton)
       
       // Modal should open
@@ -196,14 +196,14 @@ describe('App', () => {
       await user.click(addButton)
       
       // Switch to Next category
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       await user.click(nextButton)
       
       // Task should not be visible in Next
       expect(screen.queryByText('Draggable Task')).not.toBeInTheDocument()
       
       // Switch back to Inbox
-      const inboxButton = screen.getByText('📥 Inbox').closest('button')!
+      const inboxButton = screen.getByRole('button', { name: /📥 Inbox/ })
       await user.click(inboxButton)
       
       // Task should be visible in Inbox
@@ -223,7 +223,7 @@ describe('App', () => {
       
       // Drag task to Next category via sidebar
       const taskElement = screen.getByText('Task to Move').closest('div')!
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       
       // Simulate drag and drop
       fireEvent.dragStart(taskElement, {
@@ -259,7 +259,7 @@ describe('App', () => {
       await user.click(addButton)
       
       // Switch to Next and add task
-      const nextButton = screen.getByText('⏭️ Next').closest('button')!
+      const nextButton = screen.getByRole('button', { name: /⏭️ Next/ })
       await user.click(nextButton)
       
       await user.type(titleInput, 'Next Task')
@@ -269,7 +269,7 @@ describe('App', () => {
       expect(screen.getByText('1')).toBeInTheDocument() // Next category count
       
       // Switch back to Inbox
-      const inboxButton = screen.getByText('📥 Inbox').closest('button')!
+      const inboxButton = screen.getByRole('button', { name: /📥 Inbox/ })
       await user.click(inboxButton)
       
       expect(screen.getByText('1')).toBeInTheDocument() // Inbox category count

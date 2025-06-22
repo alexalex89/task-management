@@ -26,14 +26,18 @@ export const DragAndDropTaskList = ({
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     setDraggedTask(taskId);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', taskId);
-    e.dataTransfer.setData('application/json', JSON.stringify({ taskId, sourceCategory: category }));
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', taskId);
+      e.dataTransfer.setData('application/json', JSON.stringify({ taskId, sourceCategory: category }));
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
   };
 
   const handleDragEnter = (e: React.DragEvent, taskId: string) => {
@@ -52,6 +56,8 @@ export const DragAndDropTaskList = ({
     e.preventDefault();
     
     try {
+      if (!e.dataTransfer) return;
+      
       const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
       const { taskId: draggedTaskId, sourceCategory } = dragData;
       
